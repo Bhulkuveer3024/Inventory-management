@@ -1,0 +1,13 @@
+asgiref==3.9.1
+charset-normalizer==3.4.2
+Django==5.2.4
+iniconfig==2.1.0
+packaging==24.2
+pillow==11.3.0
+pluggy==1.5.0
+pygame==2.5.2
+pytest==8.3.5
+reportlab==4.4.3
+setuptools==69.5.1
+sqlparse==0.5.3
+wheel==0.43.0
