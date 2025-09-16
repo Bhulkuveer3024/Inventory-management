@@ -1,5 +1,7 @@
-from django.contrib import admin, include
-from django.urls import path    
+from django.contrib import admin
+from django.urls import include, path
 
-app_name = 'inventory'
-urlpatterns = []
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('inventory/', include('inventory.urls')),
+]

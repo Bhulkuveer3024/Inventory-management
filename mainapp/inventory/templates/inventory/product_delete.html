@@ -1,0 +1,13 @@
+// {% extends "inventory/base.html" %}
+{% block title %}Delete Product{% endblock %}
+
+{% block content %}
+<h1>Delete Product</h1>
+<p>Are you sure you want to delete the product <strong>{{ product.name }}</strong> (SKU: {{ product.sku }})?</p>
+
+<form method="post">
+  {% csrf_token %}
+  <button type="submit" class="btn btn-danger">Yes, Delete</button>
+  <a href="{% url 'inventory:product_list' %}" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %}
