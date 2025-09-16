@@ -27,3 +27,4 @@ urlpatterns = [
     path('ajax/update-stock/', views.ajax_update_stock, name='ajax_update_stock'),
     path('ajax/product-search/', views.ajax_product_search, name='ajax_product_search'),
 ]
+
