@@ -1,11 +1,82 @@
-<!-- shows a list of orders -->
-<!doctype html><html><body>
-<h1>Orders</h1>
-<ul>
-  {% for o in orders %}
-    <li><a href="{% url 'orders:detail' o.id %}">Order #{{ o.id }} - {{ o.customer_name }}</a></li>
-  {% empty %}
-    <li>No orders yet.</li>
-  {% endfor %}
-</ul>
-</body></html>
+{% extends "inventory/base.html" %}
+{% block title %}Orders{% endblock %}
+{% block content %}
+
+<style>
+  .page-title { margin: 0 0 1rem; }
+  .stats { display: grid; grid-template-columns: repeat(6, 1fr); gap: .75rem; margin-bottom: 1rem; }
+  .stat { border: 1px solid rgba(0,0,0,.125); border-radius: .5rem; padding: .75rem; background: #f8f9fa; text-align: center; }
+  .stat .num { font-weight: 800; font-size: 1.2rem; }
+  @media (max-width: 992px){ .stats { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 576px){ .stats { grid-template-columns: 1fr 1fr; } }
+  .badge-rounded { border-radius: 999px; padding: .35rem .6rem; font-weight: 600; }
+</style>
+
+<h1 class="page-title">Orders</h1>
+
+<div class="stats">
+  <div class="stat"><div class="text-muted">Total</div><div class="num">{{ counts.total }}</div></div>
+  <div class="stat"><div class="text-muted">Draft</div><div class="num">{{ counts.draft }}</div></div>
+  <div class="stat"><div class="text-muted">Pending</div><div class="num">{{ counts.pending }}</div></div>
+  <div class="stat"><div class="text-muted">Paid</div><div class="num">{{ counts.paid }}</div></div>
+  <div class="stat"><div class="text-muted">Fulfilled</div><div class="num">{{ counts.fulfilled }}</div></div>
+  <div class="stat"><div class="text-muted">Cancelled</div><div class="num">{{ counts.cancelled }}</div></div>
+</div>
+
+<div class="mb-3 d-flex gap-2">
+  <a href="{% url 'orders:create' %}" class="btn btn-primary">+ New Order</a>
+  <a href="{% url 'orders:list' %}" class="btn btn-outline-secondary">Refresh</a>
+</div>
+
+<table class="table table-striped table-bordered align-middle">
+  <thead class="table-dark">
+    <tr>
+      <th>#</th>
+      <th>Customer</th>
+      <th>Email</th>
+      <th>Status</th>
+      <th>Created</th>
+      <th>Total</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for o in orders %}
+    <tr>
+      <td><a href="{% url 'orders:detail' o.pk %}">#{{ o.id }}</a></td>
+      <td>{{ o.customer_name }}</td>
+      <td>{{ o.customer_email|default:"—" }}</td>
+      <td>
+        {% if o.status == "DRAFT" %}
+          <span class="badge bg-secondary badge-rounded">Draft</span>
+        {% elif o.status == "PENDING" %}
+          <span class="badge bg-warning text-dark badge-rounded">Pending</span>
+        {% elif o.status == "PAID" %}
+          <span class="badge bg-success badge-rounded">Paid</span>
+        {% elif o.status == "FULFILLED" %}
+          <span class="badge bg-info text-dark badge-rounded">Fulfilled</span>
+        {% elif o.status == "CANCELLED" %}
+          <span class="badge bg-danger badge-rounded">Cancelled</span>
+        {% else %}
+          <span class="badge bg-light text-dark badge-rounded">{{ o.get_status_display }}</span>
+        {% endif %}
+      </td>
+      <td>{{ o.created_at|date:"Y-m-d H:i" }}</td>
+      <td>
+        {% with t=o.total %}
+          {% if t %}${{ t }}{% else %}—{% endif %}
+        {% endwith %}
+      </td>
+      <td class="d-flex gap-1">
+        <a href="{% url 'orders:detail' o.pk %}" class="btn btn-sm btn-info">View</a>
+        <a href="{% url 'orders:update' o.pk %}" class="btn btn-sm btn-warning">Edit</a>
+        <a href="{% url 'orders:delete' o.pk %}" class="btn btn-sm btn-danger">Delete</a>
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="7" class="text-center">No orders found.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

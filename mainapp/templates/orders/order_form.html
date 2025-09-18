@@ -1,0 +1,140 @@
+{% extends "inventory/base.html" %}
+{% block title %}{% if is_create %}New Order{% else %}Edit Order{% endif %}{% endblock %}
+{% block content %}
+
+<style>
+  .card { border: 1px solid rgba(0,0,0,.125); border-radius: .5rem; }
+  .card-header { padding: .75rem 1rem; border-bottom: 1px solid rgba(0,0,0,.125); background: #f8f9fa; font-weight: 600; }
+  .card-body { padding: 1rem; }
+  .remove-btn { white-space: nowrap; }
+</style>
+
+<h1 class="mb-3">{% if is_create %}New Order{% else %}Edit Order #{{ order.id }}{% endif %}</h1>
+
+<form method="post" novalidate>
+  {% csrf_token %}
+
+  <div class="card mb-3">
+    <div class="card-header">Customer</div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label">Name</label>
+          {{ form.customer_name }}
+          {% for e in form.customer_name.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Email</label>
+          {{ form.customer_email }}
+          {% for e in form.customer_email.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Status</label>
+          {{ form.status }}
+          {% for e in form.status.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb-3">
+    <div class="card-header">Items</div>
+    <div class="card-body">
+      {{ formset.management_form }}
+      <table class="table align-middle">
+        <thead>
+          <tr>
+            <th style="width:45%;">Product</th>
+            <th style="width:20%;">Unit Price</th>
+            <th style="width:15%;">Qty</th>
+            <th style="width:10%;">Delete</th>
+            <th style="width:10%;"></th>
+          </tr>
+        </thead>
+        <tbody id="items-table-body">
+          {% for f in formset.forms %}
+          <tr class="item-row">
+            <td>{{ f.product_name }}</td>
+            <td>{{ f.unit_price }}</td>
+            <td>{{ f.quantity }}</td>
+            <td>{{ f.DELETE }}</td>
+            <td><button type="button" class="btn btn-sm btn-outline-danger remove-btn" onclick="removeRow(this)">Remove</button></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <template id="empty-row">
+        <tr class="item-row">
+          <td>__PRODUCT__</td>
+          <td>__PRICE__</td>
+          <td>__QTY__</td>
+          <td>__DEL__</td>
+          <td><button type="button" class="btn btn-sm btn-outline-danger remove-btn" onclick="removeRow(this)">Remove</button></td>
+        </tr>
+      </template>
+
+      <button type="button" class="btn btn-outline-primary" id="add-item-btn">+ Add Item</button>
+    </div>
+  </div>
+
+  <div class="d-flex gap-2">
+    <button type="submit" class="btn btn-primary">{% if is_create %}Create{% else %}Save Changes{% endif %}</button>
+    <a href="{% url 'orders:list' %}" class="btn btn-secondary">Cancel</a>
+  </div>
+</form>
+
+<script>
+  // Tiny JS to clone the empty_form and append a row (no external files).
+  (function() {
+    const totalForms = document.getElementById('id_items-TOTAL_FORMS');
+    const addBtn = document.getElementById('add-item-btn');
+    const tbody = document.getElementById('items-table-body');
+
+    // Build a prototype row from empty_form HTML
+    const emptyPrefix = '__prefix__';
+    const emptyHTML = `
+      {{ formset.empty_form.product_name.as_widget|escapejs }}
+      {{ formset.empty_form.unit_price.as_widget|escapejs }}
+      {{ formset.empty_form.quantity.as_widget|escapejs }}
+      {{ formset.empty_form.DELETE.as_widget|escapejs }}
+    `.trim().split('\n');
+
+    function newRow(index) {
+      const product = emptyHTML[0].replaceAll(emptyPrefix, index);
+      const price = emptyHTML[1].replaceAll(emptyPrefix, index);
+      const qty = emptyHTML[2].replaceAll(emptyPrefix, index);
+      const del = emptyHTML[3].replaceAll(emptyPrefix, index);
+
+      let row = document.getElementById('empty-row').content.firstElementChild.cloneNode(true);
+      row.innerHTML = row.innerHTML
+        .replace('__PRODUCT__', product)
+        .replace('__PRICE__', price)
+        .replace('__QTY__', qty)
+        .replace('__DEL__', del);
+      return row;
+    }
+
+    addBtn?.addEventListener('click', function() {
+      const idx = parseInt(totalForms.value, 10);
+      tbody.appendChild(newRow(idx));
+      totalForms.value = idx + 1; // keep Django formset count in sync
+    });
+  })();
+
+  function removeRow(btn) {
+    const tr = btn.closest('tr');
+    // If there's a DELETE checkbox in this row, tick it (for existing rows)
+    const del = tr.querySelector('input[type=checkbox][name$="-DELETE"]');
+    if (del) {
+      del.checked = true;
+      tr.style.display = 'none';
+    } else {
+      // New unsaved row: just remove the element
+      tr.remove();
+      // NOTE: We keep TOTAL_FORMS as-is; Django ignores missing indices.
+    }
+  }
+</script>
+
+{% endblock %}
