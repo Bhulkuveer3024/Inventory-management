@@ -1,0 +1,11 @@
+<!-- shows a list of orders -->
+<!doctype html><html><body>
+<h1>Orders</h1>
+<ul>
+  {% for o in orders %}
+    <li><a href="{% url 'orders:detail' o.id %}">Order #{{ o.id }} - {{ o.customer_name }}</a></li>
+  {% empty %}
+    <li>No orders yet.</li>
+  {% endfor %}
+</ul>
+</body></html>

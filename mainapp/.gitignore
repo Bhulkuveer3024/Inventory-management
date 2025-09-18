@@ -1,4 +1,35 @@
-db.sqlite3
+# Django
+*.log
+*.pot
 *.pyc
 __pycache__/
+
+# SQLite DBs (anywhere)
+**/db.sqlite3
+**/db.sqlite3-journal
+*.sqlite3
+
+# Media uploads (runtime)
+media/
+
+# Environments
 .env
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Static files
+# Keep static/ tracked if it's your source assets; only ignore the collectstatic output:
+staticfiles/
+# static/   <-- uncomment ONLY if you truly generate this dir
+
+# VSCode / PyCharm
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

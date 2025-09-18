@@ -1,0 +1,14 @@
+<!-- shows a single order with its items -->
+<!doctype html><html><body>
+<h1>Order #{{ order.id }}</h1>
+<p>{{ order.customer_name }} ({{ order.customer_email }}) — {{ order.get_status_display }}</p>
+
+<h2>Items</h2>
+<ul>
+  {% for it in order.items.all %}
+    <li>{{ it.product_name }} — {{ it.quantity }} × {{ it.unit_price }} = {{ it.subtotal }}</li>
+  {% empty %}
+    <li>No items.</li>
+  {% endfor %}
+</ul>
+</body></html>
