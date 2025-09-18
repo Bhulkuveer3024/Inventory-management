@@ -25,7 +25,6 @@ class ProductAdmin(admin.ModelAdmin):
     list_display = [
         'name', 
         'sku', 
-        'category', 
         'price', 
         'quantity', 
         'stock_status',
@@ -34,7 +33,6 @@ class ProductAdmin(admin.ModelAdmin):
     ]
     
     list_filter = [
-        'category', 
         'is_active', 
         'created_at', 
         ('quantity', admin.filters.SimpleListFilter)
@@ -162,7 +160,6 @@ class ProductAdmin(admin.ModelAdmin):
                 return queryset.filter(quantity__gt=models.F('min_stock_level'))
     
     list_filter = [
-        'category', 
         'is_active', 
         'created_at',
         LowStockFilter

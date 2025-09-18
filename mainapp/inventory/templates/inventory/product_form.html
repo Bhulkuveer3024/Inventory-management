@@ -1,4 +1,5 @@
-// {% extends "inventory/base.html" %}
+ {% extends "inventory/base.html" %}
+  {% load widget_tweaks %}
 {% block title %}
   {% if form.instance.pk %}Edit Product{% else %}Create Product{% endif %}
 {% endblock %}
@@ -22,12 +23,6 @@
     <label for="{{ form.sku.id_for_label }}" class="form-label">SKU</label>
     {{ form.sku|add_class:"form-control" }}
     {{ form.sku.errors }}
-  </div>
-
-  <div class="mb-3">
-    <label for="{{ form.category.id_for_label }}" class="form-label">Category</label>
-    {{ form.category|add_class:"form-select" }}
-    {{ form.category.errors }}
   </div>
 
   <div class="mb-3">
@@ -69,6 +64,7 @@
   <button type="submit" class="btn btn-success">Save</button>
   <a href="{% url 'inventory:product_list' %}" class="btn btn-secondary">Cancel</a>
 </form>
+
 {% endblock %}
 
 {% block extra_head %}
