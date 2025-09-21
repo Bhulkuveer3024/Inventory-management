@@ -4,7 +4,7 @@
 
 <style>
   .page-title { margin: 0 0 1rem; }
-  .stats { display: grid; grid-template-columns: repeat(6, 1fr); gap: .75rem; margin-bottom: 1rem; }
+  .stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: .75rem; margin-bottom: 1rem; }
   .stat { border: 1px solid rgba(0,0,0,.125); border-radius: .5rem; padding: .75rem; background: #f8f9fa; text-align: center; }
   .stat .num { font-weight: 800; font-size: 1.2rem; }
   @media (max-width: 992px){ .stats { grid-template-columns: repeat(3, 1fr); } }
@@ -19,7 +19,6 @@
   <div class="stat"><div class="text-muted">Draft</div><div class="num">{{ counts.draft }}</div></div>
   <div class="stat"><div class="text-muted">Pending</div><div class="num">{{ counts.pending }}</div></div>
   <div class="stat"><div class="text-muted">Paid</div><div class="num">{{ counts.paid }}</div></div>
-  <div class="stat"><div class="text-muted">Fulfilled</div><div class="num">{{ counts.fulfilled }}</div></div>
   <div class="stat"><div class="text-muted">Cancelled</div><div class="num">{{ counts.cancelled }}</div></div>
 </div>
 
@@ -52,8 +51,6 @@
         {% elif o.status == "PENDING" %}
           <span class="badge bg-warning text-dark badge-rounded">Pending</span>
         {% elif o.status == "PAID" %}
-          <span class="badge bg-success badge-rounded">Paid</span>
-        {% elif o.status == "FULFILLED" %}
           <span class="badge bg-info text-dark badge-rounded">Fulfilled</span>
         {% elif o.status == "CANCELLED" %}
           <span class="badge bg-danger badge-rounded">Cancelled</span>
