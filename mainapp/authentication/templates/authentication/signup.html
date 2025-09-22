@@ -1,6 +1,70 @@
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Signup</button>
-</form>
-<a href="{% url 'login' %}">Login</a>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sign Up</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 400px; margin: 100px auto; padding: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], input[type="email"], input[type="password"], select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        button { background-color: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background-color: #218838; }
+        .error { color: red; margin-top: 10px; }
+        .help-text { color: #6c757d; font-size: 0.875em; margin-top: 5px; display: block; }
+        .links { margin-top: 20px; text-align: center; }
+        .links a { color: #007bff; text-decoration: none; }
+        .links a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <h2>Sign Up</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="{{ form.username.id_for_label }}">Username:</label>
+            {{ form.username }}
+            {% if form.username.errors %}
+                <div class="error">{{ form.username.errors.0 }}</div>
+            {% endif %}
+        </div>
+        <div class="form-group">
+            <label for="{{ form.email.id_for_label }}">Email:</label>
+            {{ form.email }}
+            {% if form.email.errors %}
+                <div class="error">{{ form.email.errors.0 }}</div>
+            {% endif %}
+        </div>
+        <div class="form-group">
+            <label for="{{ form.role.id_for_label }}">Role:</label>
+            {{ form.role }}
+            {% if form.role.help_text %}
+                <small class="help-text">{{ form.role.help_text }}</small>
+            {% endif %}
+            {% if form.role.errors %}
+                <div class="error">{{ form.role.errors.0 }}</div>
+            {% endif %}
+        </div>
+        <div class="form-group">
+            <label for="{{ form.password1.id_for_label }}">Password:</label>
+            {{ form.password1 }}
+            {% if form.password1.errors %}
+                <div class="error">{{ form.password1.errors.0 }}</div>
+            {% endif %}
+        </div>
+        <div class="form-group">
+            <label for="{{ form.password2.id_for_label }}">Confirm Password:</label>
+            {{ form.password2 }}
+            {% if form.password2.errors %}
+                <div class="error">{{ form.password2.errors.0 }}</div>
+            {% endif %}
+        </div>
+        {% if form.non_field_errors %}
+            <div class="error">{{ form.non_field_errors.0 }}</div>
+        {% endif %}
+        <button type="submit">Sign Up</button>
+    </form>
+    <div class="links">
+        <a href="{% url 'authentication:login' %}">Already have an account? Login</a>
+    </div>
+</body>
+</html>
