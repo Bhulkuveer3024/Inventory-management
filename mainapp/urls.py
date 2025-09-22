@@ -16,10 +16,18 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.shortcuts import redirect
+from authentication.views import login_view, signup_view
+
+def redirect_to_login(request):
+    return redirect('authentication:login')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('authentication.urls')),
+    path('auth/', include('authentication.urls')),
     path('inventory/', include('inventory.urls')),
-    path('orders/', include('orders.urls')),    
+    path('orders/', include('orders.urls')),
+    path('login/', login_view, name='login'),  # Direct access to login
+    path('signup/', signup_view, name='signup'),  # Direct access to signup
+    path('', redirect_to_login, name='home'),  # Default to login page
 ]

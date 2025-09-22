@@ -11,13 +11,19 @@ from .forms import OrderForm, OrderItemFormSet
 from inventory.models import Product
 
 # ----------------------------
-# Role-check function
+# Role-check functions
 # ----------------------------
 def is_staff_or_admin(user):
-    return user.role in ['staff', 'admin']
+    return user.role in ['sales_staff', 'store_manager', 'system_admin']
+
+def is_manager_or_admin(user):
+    return user.role in ['store_manager', 'system_admin']
+
+def is_system_admin(user):
+    return user.role == 'system_admin'
 
 # ----------------------------
-# Orders Views
+# Orders Views with role-based access
 # ----------------------------
 @login_required
 @user_passes_test(is_staff_or_admin)
@@ -79,7 +85,7 @@ def order_create(request):
     )
 
 @login_required
-@user_passes_test(is_staff_or_admin)
+@user_passes_test(is_manager_or_admin)
 def order_update(request, pk):
     order = get_object_or_404(Order, pk=pk)
     old_status = order.status
@@ -130,7 +136,7 @@ def order_update(request, pk):
     )
 
 @login_required
-@user_passes_test(is_staff_or_admin)
+@user_passes_test(is_system_admin)
 def order_delete(request, pk):
     order = get_object_or_404(Order, pk=pk)
     if request.method == "POST":

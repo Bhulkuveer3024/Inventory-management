@@ -7,17 +7,19 @@ def is_manager_or_admin(user):
     return user.role in ['store_manager', 'system_admin']
 
 def is_staff_or_admin(user):
-    return user.role in ['sales_staff', 'system_admin']
+    return user.role in ['sales_staff', 'store_manager', 'system_admin']
 
+def is_system_admin(user):
+    return user.role == 'system_admin'
 
-# Inventory views (only accessible to manager or admin)
+# Inventory views with role-based access
 @user_passes_test(is_manager_or_admin)
 def product_list(request):
     products = Product.objects.all()
     context = {'products': products}
     return render(request, 'inventory/product_list.html', context)
 
-@user_passes_test(is_manager_or_admin)
+@user_passes_test(is_staff_or_admin)
 def product_detail(request, pk):
     product = get_object_or_404(Product, pk=pk)
     return render(request, 'inventory/product_detail.html', {'product': product})
@@ -47,7 +49,7 @@ def product_edit(request, pk):
         form = ProductForm(instance=product)
     return render(request, 'inventory/product_form.html', {'form': form})
 
-@user_passes_test(is_manager_or_admin)
+@user_passes_test(is_system_admin)
 def product_delete(request, pk):
     product = get_object_or_404(Product, pk=pk)
     if request.method == 'POST':
