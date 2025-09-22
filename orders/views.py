@@ -69,7 +69,7 @@ def order_create(request):
                     if order.status == "PAID":
                         _apply_stock_delta(order, deduct=True)
                 messages.success(request, "Order created.")
-                return redirect("orders:order_detail", pk=order.pk)
+                return redirect("orders:detail", pk=order.pk)
             except ValidationError as e:
                 messages.error(request, f"{e}")
         else:
@@ -114,7 +114,7 @@ def order_update(request, pk):
                                 _apply_stock_delta_partial(deltas)
 
                 messages.success(request, "Order updated.")
-                return redirect("orders:order_detail", pk=order.pk)
+                return redirect("orders:detail", pk=order.pk)
             except ValidationError as e:
                 messages.error(request, f"{e}")
         else:
@@ -142,7 +142,7 @@ def order_delete(request, pk):
     if request.method == "POST":
         order.delete()
         messages.success(request, "Order deleted.")
-        return redirect("orders:order_list")
+        return redirect("orders:list")
     return render(request, "orders/order_confirm_delete.html", {"order": order})
 
 # ----------------------------

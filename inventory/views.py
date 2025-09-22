@@ -13,14 +13,14 @@ def is_system_admin(user):
     return user.role == 'system_admin'
 
 # Inventory views with role-based access
-@user_passes_test(is_manager_or_admin)
 def product_list(request):
+    """Public view of all products - no authentication required"""
     products = Product.objects.all()
     context = {'products': products}
     return render(request, 'inventory/product_list.html', context)
 
-@user_passes_test(is_staff_or_admin)
 def product_detail(request, pk):
+    """Public view of individual product details - no authentication required"""
     product = get_object_or_404(Product, pk=pk)
     return render(request, 'inventory/product_detail.html', {'product': product})
 
