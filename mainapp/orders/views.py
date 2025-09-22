@@ -191,3 +191,4 @@ def _apply_stock_delta(order: Order, deduct: bool):
         p = it.product
         p.quantity = p.quantity - it.quantity if deduct else p.quantity + it.quantity
         p.save(update_fields=["quantity"])
+

@@ -3,12 +3,12 @@ from .forms import ProductForm
 from .models import Product  
 from django.contrib.auth.decorators import user_passes_test
 
-# Role-checking functions
 def is_manager_or_admin(user):
-    return user.role in ['manager', 'admin']
+    return user.role in ['store_manager', 'system_admin']
 
 def is_staff_or_admin(user):
-    return user.role in ['staff', 'admin']
+    return user.role in ['sales_staff', 'system_admin']
+
 
 # Inventory views (only accessible to manager or admin)
 @user_passes_test(is_manager_or_admin)
