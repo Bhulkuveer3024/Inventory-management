@@ -7,12 +7,22 @@
   .card-header { padding: .75rem 1rem; border-bottom: 1px solid rgba(0,0,0,.125); background: #f8f9fa; font-weight: 600; }
   .card-body { padding: 1rem; }
   .remove-btn { white-space: nowrap; }
+  .totals { display:flex; gap:1rem; align-items:center; font-weight:700; font-size:1.1rem; }
+  .totals .value { padding:.25rem .5rem; border:1px solid #ddd; border-radius:.5rem; background:#fff; min-width:6ch; text-align:right; }
+  .errorlist { color:#b00020; margin:.25rem 0 0; list-style:none; padding:0; font-size:.9rem; }
 </style>
 
 <h1 class="mb-3">{% if is_create %}New Order{% else %}Edit Order #{{ order.id }}{% endif %}</h1>
 
 <form method="post" novalidate>
   {% csrf_token %}
+
+  {% if form.non_field_errors %}
+    <ul class="errorlist">{% for e in form.non_field_errors %}<li>{{ e }}</li>{% endfor %}</ul>
+  {% endif %}
+  {% if formset.non_form_errors %}
+    <ul class="errorlist">{% for e in formset.non_form_errors %}<li>{{ e }}</li>{% endfor %}</ul>
+  {% endif %}
 
   <div class="card mb-3">
     <div class="card-header">Customer</div>
@@ -21,17 +31,17 @@
         <div class="col-md-4">
           <label class="form-label">Name</label>
           {{ form.customer_name }}
-          {% for e in form.customer_name.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+          {% if form.customer_name.errors %}<ul class="errorlist">{% for e in form.customer_name.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
         </div>
         <div class="col-md-4">
           <label class="form-label">Email</label>
           {{ form.customer_email }}
-          {% for e in form.customer_email.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+          {% if form.customer_email.errors %}<ul class="errorlist">{% for e in form.customer_email.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
         </div>
         <div class="col-md-4">
           <label class="form-label">Status</label>
           {{ form.status }}
-          {% for e in form.status.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+          {% if form.status.errors %}<ul class="errorlist">{% for e in form.status.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
         </div>
       </div>
     </div>
@@ -54,10 +64,21 @@
         <tbody id="items-table-body">
           {% for f in formset.forms %}
           <tr class="item-row">
-            <td>{{ f.product_name }}</td>
-            <td>{{ f.unit_price }}</td>
-            <td>{{ f.quantity }}</td>
-            <td>{{ f.DELETE }}</td>
+            <td>
+              {# IMPORTANT: include hidden id so Django knows existing rows #}
+              {% for hidden in f.hidden_fields %}{{ hidden }}{% endfor %}
+              {{ f.product }}
+              {% if f.product.errors %}<ul class="errorlist">{% for e in f.product.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </td>
+            <td>
+              {{ f.unit_price }}
+              {% if f.unit_price.errors %}<ul class="errorlist">{% for e in f.unit_price.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </td>
+            <td>
+              {{ f.quantity }}
+              {% if f.quantity.errors %}<ul class="errorlist">{% for e in f.quantity.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </td>
+            <td class="text-center">{{ f.DELETE }}</td>
             <td><button type="button" class="btn btn-sm btn-outline-danger remove-btn" onclick="removeRow(this)">Remove</button></td>
           </tr>
           {% endfor %}
@@ -66,15 +87,24 @@
 
       <template id="empty-row">
         <tr class="item-row">
-          <td>__PRODUCT__</td>
+          <td>
+            __HIDDENS__
+            __PRODUCT__
+          </td>
           <td>__PRICE__</td>
           <td>__QTY__</td>
-          <td>__DEL__</td>
+          <td class="text-center">__DEL__</td>
           <td><button type="button" class="btn btn-sm btn-outline-danger remove-btn" onclick="removeRow(this)">Remove</button></td>
         </tr>
       </template>
 
-      <button type="button" class="btn btn-outline-primary" id="add-item-btn">+ Add Item</button>
+      <div class="d-flex justify-content-between align-items-center">
+        <button type="button" class="btn btn-outline-primary" id="add-item-btn">+ Add Item</button>
+        <div class="totals">
+          <span>Order Total:</span>
+          <span class="value" id="order-total">0.00</span>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -85,56 +115,97 @@
 </form>
 
 <script>
-  // Tiny JS to clone the empty_form and append a row (no external files).
+  // Build a simple {productId: price} map for auto-fill
+  const PRICE_MAP = {
+    {% for p in products %}
+      "{{ p.id }}": "{{ p.price }}",
+    {% endfor %}
+  };
+
   (function() {
+    const tbody = document.getElementById('items-table-body');
+    const totalEl = document.getElementById('order-total');
     const totalForms = document.getElementById('id_items-TOTAL_FORMS');
     const addBtn = document.getElementById('add-item-btn');
-    const tbody = document.getElementById('items-table-body');
 
-    // Build a prototype row from empty_form HTML
     const emptyPrefix = '__prefix__';
-    const emptyHTML = `
-      {{ formset.empty_form.product_name.as_widget|escapejs }}
-      {{ formset.empty_form.unit_price.as_widget|escapejs }}
-      {{ formset.empty_form.quantity.as_widget|escapejs }}
-      {{ formset.empty_form.DELETE.as_widget|escapejs }}
-    `.trim().split('\n');
+    const widgets = {
+      hiddens: `{{ formset.empty_form.id.as_widget|escapejs }}`,
+      product: `{{ formset.empty_form.product.as_widget|escapejs }}`,
+      price:   `{{ formset.empty_form.unit_price.as_widget|escapejs }}`,
+      qty:     `{{ formset.empty_form.quantity.as_widget|escapejs }}`,
+      del:     `{{ formset.empty_form.DELETE.as_widget|escapejs }}`
+    };
+
+    function computeTotal() {
+      let sum = 0;
+      tbody.querySelectorAll('tr.item-row').forEach(row => {
+        const del = row.querySelector('input[type=checkbox][name$="-DELETE"]');
+        if (del && del.checked) return;
+        const priceInput = row.querySelector('input[name$="-unit_price"]');
+        const qtyInput = row.querySelector('input[name$="-quantity"]');
+        const price = parseFloat(priceInput?.value || '0');
+        const qty = parseFloat(qtyInput?.value || '0');
+        if (!isNaN(price) && !isNaN(qty)) sum += price * qty;
+      });
+      totalEl.textContent = sum.toFixed(2);
+    }
 
     function newRow(index) {
-      const product = emptyHTML[0].replaceAll(emptyPrefix, index);
-      const price = emptyHTML[1].replaceAll(emptyPrefix, index);
-      const qty = emptyHTML[2].replaceAll(emptyPrefix, index);
-      const del = emptyHTML[3].replaceAll(emptyPrefix, index);
-
       let row = document.getElementById('empty-row').content.firstElementChild.cloneNode(true);
       row.innerHTML = row.innerHTML
-        .replace('__PRODUCT__', product)
-        .replace('__PRICE__', price)
-        .replace('__QTY__', qty)
-        .replace('__DEL__', del);
+        .replace('__HIDDENS__', widgets.hiddens.replaceAll(emptyPrefix, index))
+        .replace('__PRODUCT__', widgets.product.replaceAll(emptyPrefix, index))
+        .replace('__PRICE__',   widgets.price.replaceAll(emptyPrefix, index))
+        .replace('__QTY__',     widgets.qty.replaceAll(emptyPrefix, index))
+        .replace('__DEL__',     widgets.del.replaceAll(emptyPrefix, index));
       return row;
     }
 
     addBtn?.addEventListener('click', function() {
       const idx = parseInt(totalForms.value, 10);
       tbody.appendChild(newRow(idx));
-      totalForms.value = idx + 1; // keep Django formset count in sync
+      totalForms.value = idx + 1;
+      computeTotal();
     });
-  })();
 
-  function removeRow(btn) {
-    const tr = btn.closest('tr');
-    // If there's a DELETE checkbox in this row, tick it (for existing rows)
-    const del = tr.querySelector('input[type=checkbox][name$="-DELETE"]');
-    if (del) {
-      del.checked = true;
-      tr.style.display = 'none';
-    } else {
-      // New unsaved row: just remove the element
-      tr.remove();
-      // NOTE: We keep TOTAL_FORMS as-is; Django ignores missing indices.
+    // Auto-fill unit price when product changes (only if empty/0)
+    document.addEventListener('change', function(e) {
+      if (e.target.matches('select[name$="-product"]')) {
+        const select = e.target;
+        const row = select.closest('tr');
+        const priceInput = row.querySelector('input[name$="-unit_price"]');
+        const pid = select.value;
+        if (pid && PRICE_MAP[pid]) {
+          if (!priceInput.value || parseFloat(priceInput.value) === 0) {
+            priceInput.value = PRICE_MAP[pid];
+            priceInput.dispatchEvent(new Event('input')); // refresh total
+          }
+        }
+      }
+    });
+
+    // Recalc totals as you type
+    tbody.addEventListener('input', function(e) {
+      if (e.target.name?.endsWith('-unit_price') ||
+          e.target.name?.endsWith('-quantity') ||
+          e.target.name?.endsWith('-DELETE')) {
+        computeTotal();
+      }
+    });
+
+    // Initial calc
+    computeTotal();
+
+    // Remove row (uses DELETE checkbox if present)
+    window.removeRow = function(btn) {
+      const tr = btn.closest('tr');
+      const del = tr.querySelector('input[type=checkbox][name$="-DELETE"]');
+      if (del) { del.checked = true; tr.style.display = 'none'; }
+      else { tr.remove(); }
+      computeTotal();
     }
-  }
+  })();
 </script>
 
 {% endblock %}

@@ -1,7 +1,8 @@
-# What this does: Defines simple forms and a formset (multiple items) for Orders.
+# orders/forms.py
 from django import forms
 from django.forms import inlineformset_factory
 from .models import Order, OrderItem
+from inventory.models import Product
 
 class OrderForm(forms.ModelForm):
     class Meta:
@@ -14,19 +15,32 @@ class OrderForm(forms.ModelForm):
         }
 
 class OrderItemForm(forms.ModelForm):
+    # product not required so old rows without a product can still save
+    product = forms.ModelChoiceField(
+        queryset=Product.objects.filter(is_active=True).order_by("name"),
+        required=False,
+        widget=forms.Select(attrs={"class": "form-select"})
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        inst = self.instance
+        # Prefill price from product for existing rows that have no price yet
+        if inst and inst.pk and (not inst.unit_price or float(inst.unit_price) == 0) and inst.product_id:
+            self.fields["unit_price"].initial = inst.product.price
+
     class Meta:
         model = OrderItem
-        fields = ["product_name", "unit_price", "quantity"]
+        fields = ["product", "unit_price", "quantity"]
         widgets = {
-            "product_name": forms.TextInput(attrs={"class": "form-control"}),
             "unit_price": forms.NumberInput(attrs={"class": "form-control", "step": "0.01", "min": "0"}),
             "quantity": forms.NumberInput(attrs={"class": "form-control", "min": "1"}),
         }
 
-# Inline formset to edit Order + its OrderItems together
 OrderItemFormSet = inlineformset_factory(
     Order, OrderItem,
     form=OrderItemForm,
-    fields=["product_name", "unit_price", "quantity"],
-    extra=1, can_delete=True
+    fields=["product", "unit_price", "quantity"],
+    extra=1,
+    can_delete=True
 )
