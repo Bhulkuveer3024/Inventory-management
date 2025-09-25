@@ -56,3 +56,4 @@ class Command(BaseCommand):
                 return password
             else:
                 self.stdout.write(self.style.ERROR('Passwords do not match. Try again.'))
+

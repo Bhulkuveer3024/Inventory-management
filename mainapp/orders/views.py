@@ -13,15 +13,18 @@ from inventory.models import Product
 # ----------------------------
 # Role-check function
 # ----------------------------
-def is_staff_or_admin(user):
-    return user.role in ['staff', 'admin']
+def has_order_access(user):
+    # Only store_manager and sales_staff can access orders
+    return user.role in ['store_manager', 'sales_staff']
 
 # ----------------------------
 # Orders Views
 # ----------------------------
 @login_required
-@user_passes_test(is_staff_or_admin)
+@user_passes_test(has_order_access)
 def order_list(request):
+    if not has_order_access(request.user):
+        return redirect('inventory:product_list')
     orders = Order.objects.prefetch_related(
         Prefetch("items", queryset=OrderItem.objects.all())
     ).order_by("-id")
@@ -43,14 +46,18 @@ def order_list(request):
     return render(request, "orders/order_list.html", {"orders": orders, "counts": counts, "revenue": revenue})
 
 @login_required
-@user_passes_test(is_staff_or_admin)
+@user_passes_test(has_order_access)
 def order_detail(request, pk):
+    if not has_order_access(request.user):
+        return redirect('inventory:product_list')
     order = get_object_or_404(Order.objects.prefetch_related("items"), pk=pk)
     return render(request, "orders/order_detail.html", {"order": order})
 
 @login_required
-@user_passes_test(is_staff_or_admin)
+@user_passes_test(has_order_access)
 def order_create(request):
+    if not has_order_access(request.user):
+        return redirect('inventory:product_list')
     order = Order()
     if request.method == "POST":
         form = OrderForm(request.POST, instance=order)
@@ -63,7 +70,7 @@ def order_create(request):
                     if order.status == "PAID":
                         _apply_stock_delta(order, deduct=True)
                 messages.success(request, "Order created.")
-                return redirect("orders:order_detail", pk=order.pk)
+                return redirect("orders:detail", pk=order.pk)
             except ValidationError as e:
                 messages.error(request, f"{e}")
         else:
@@ -79,8 +86,10 @@ def order_create(request):
     )
 
 @login_required
-@user_passes_test(is_staff_or_admin)
+@user_passes_test(has_order_access)
 def order_update(request, pk):
+    if not has_order_access(request.user):
+        return redirect('inventory:product_list')
     order = get_object_or_404(Order, pk=pk)
     old_status = order.status
     old_counts = _snapshot_counts(order) if old_status == "PAID" else Counter()
@@ -108,7 +117,7 @@ def order_update(request, pk):
                                 _apply_stock_delta_partial(deltas)
 
                 messages.success(request, "Order updated.")
-                return redirect("orders:order_detail", pk=order.pk)
+                return redirect("orders:detail", pk=order.pk)
             except ValidationError as e:
                 messages.error(request, f"{e}")
         else:
@@ -130,13 +139,15 @@ def order_update(request, pk):
     )
 
 @login_required
-@user_passes_test(is_staff_or_admin)
+@user_passes_test(has_order_access)
 def order_delete(request, pk):
+    if not has_order_access(request.user):
+        return redirect('inventory:product_list')
     order = get_object_or_404(Order, pk=pk)
     if request.method == "POST":
         order.delete()
         messages.success(request, "Order deleted.")
-        return redirect("orders:order_list")
+        return redirect("orders:list")
     return render(request, "orders/order_confirm_delete.html", {"order": order})
 
 # ----------------------------

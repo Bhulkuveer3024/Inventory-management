@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
+# Create your models here.
 class CustomUser(AbstractUser):
     """Custom user model extending Django's AbstractUser"""
     
@@ -24,15 +25,3 @@ class CustomUser(AbstractUser):
     
     def has_admin_permissions(self):
         return self.role == 'system_admin'
-    
-    def save(self, *args, **kwargs):
-        # Automatically set staff and superuser status for system administrators
-        if self.role == 'system_admin':
-            self.is_staff = True
-            self.is_superuser = True
-        else:
-            # Ensure non-admin users don't have admin privileges
-            self.is_staff = False
-            self.is_superuser = False
-        
-        super().save(*args, **kwargs)

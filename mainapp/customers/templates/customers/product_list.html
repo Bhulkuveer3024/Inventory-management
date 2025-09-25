@@ -1,0 +1,7 @@
+<h2>Available Products</h2>
+<ul>
+  {% for product in products %}
+    <li>{{ product.name }} - {{ product.quantity }} in stock</li>
+  {% endfor %}
+</ul>
+<a href="{% url 'customers:place_order' %}">Place an Order</a>

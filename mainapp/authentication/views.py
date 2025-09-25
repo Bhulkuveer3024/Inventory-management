@@ -1,58 +1,61 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import RedirectView
+from django.contrib import messages
 from .forms import CustomUserCreationForm, CustomAuthenticationForm
+from .models import CustomUser
 
-# Signup view
+def home_view(request):
+    """Home view that redirects to login page"""
+    return redirect('authentication:login')
+
 def signup_view(request):
+    """User registration view"""
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
             login(request, user)
+            messages.success(request, f'Welcome {user.username}! Your account has been created successfully.')
             return redirect('authentication:dashboard')
     else:
         form = CustomUserCreationForm()
-
+    
     return render(request, 'authentication/signup.html', {'form': form})
 
 def login_view(request):
+    """User login view"""
     if request.method == 'POST':
-        form = CustomAuthenticationForm(request, data=request.POST)
+        form = CustomAuthenticationForm(data=request.POST)
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-
-            # handle "next" param, otherwise go to dashboard
-            next_url = request.GET.get('next') or request.POST.get('next') or 'authentication:dashboard'
-            return redirect(next_url)
+            messages.success(request, f'Welcome back, {user.username}!')
+            # Redirect to dashboard, which will handle role-based redirect
+            return redirect('authentication:dashboard')
     else:
         form = CustomAuthenticationForm()
-
-    # Always render form if GET or invalid POST
     return render(request, 'authentication/login.html', {'form': form})
 
-
-# Logout view
-@login_required
 def logout_view(request):
-    logout(request)
+    """User logout view"""
+    if request.user.is_authenticated:
+        logout(request)
+        messages.info(request, 'You have been logged out successfully.')
     return redirect('authentication:login')
 
 @login_required
 def dashboard(request):
-    role_redirects = {
-        'system_admin': '/admin/',
-        'store_manager': '/inventory/',
-        'sales_staff': '/orders/',
-    }
-    redirect_url = role_redirects.get(request.user.role)
-    if redirect_url:
-        return redirect(redirect_url)
-    return render(request, 'authentication/unauthorized.html', status=403)
-
-# Home view that always redirects to login page
-def home_view(request):
-    return redirect('authentication:login')
+    """Dashboard view with role-based redirects"""
+    user = request.user
+    
+    # Role-based redirects
+    if user.role == 'system_admin':
+        return redirect('admin:index')  # Redirect to Django admin
+    elif user.role == 'store_manager':
+        return redirect('inventory:product_list')  # Redirect to inventory management
+    elif user.role == 'sales_staff':
+        return redirect('orders:list')  # Redirect to orders
+    else:
+        # Fallback for any other roles
+        return redirect('inventory:product_list')

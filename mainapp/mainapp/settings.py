@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'inventory',
     'orders',
     'widget_tweaks',
+    'customers',
 ]
 
 MIDDLEWARE = [
@@ -59,7 +60,10 @@ ROOT_URLCONF = 'mainapp.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / "templates"],
+        'DIRS': [
+            BASE_DIR / "templates",
+            BASE_DIR / "mainapp" / "customers" / "templates"
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
