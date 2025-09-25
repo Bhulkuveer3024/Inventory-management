@@ -1,7 +1,9 @@
+# mainapp/orders/views.py
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.core.exceptions import ValidationError
+from django.contrib.auth.decorators import login_required, user_passes_test, permission_required
+from django.core.exceptions import ValidationError, PermissionDenied
 from django.db import transaction
 from django.db.models import Prefetch
 from collections import Counter
@@ -31,7 +33,6 @@ def order_list(request):
         "draft": orders.filter(status="DRAFT").count(),
         "pending": orders.filter(status="PENDING").count(),
         "paid": orders.filter(status="PAID").count(),
-        "fulfilled": orders.filter(status="FULFILLED").count(),
         "cancelled": orders.filter(status="CANCELLED").count(),
     }
 
@@ -58,7 +59,9 @@ def order_create(request):
         if form.is_valid() and formset.is_valid():
             try:
                 with transaction.atomic():
-                    form.save()
+                    # Save order and formset (ensure formset is bound to saved order)
+                    order = form.save()
+                    formset.instance = order
                     formset.save()
                     if order.status == "PAID":
                         _apply_stock_delta(order, deduct=True)
@@ -191,4 +194,3 @@ def _apply_stock_delta(order: Order, deduct: bool):
         p = it.product
         p.quantity = p.quantity - it.quantity if deduct else p.quantity + it.quantity
         p.save(update_fields=["quantity"])
-
