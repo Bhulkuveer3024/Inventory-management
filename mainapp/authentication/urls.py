@@ -8,3 +8,7 @@ urlpatterns = [
 	path('logout/', logout_view, name='logout'),
 	path('dashboard/', dashboard, name='dashboard'),
 ]
+from django.urls import path, include
+
+app_name = 'authentication'
+urlpatterns = []

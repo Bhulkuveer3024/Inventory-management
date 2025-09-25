@@ -22,9 +22,14 @@ class Product(models.Model):
     is_active = models.BooleanField(default=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name="products")
-
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        permissions = (
+            ("can_bulk_update_prices", "Can bulk update prices"),
+        )
 
     def is_low_stock(self):
         return self.quantity <= self.min_stock_level

@@ -1,41 +1,37 @@
-# Virtual Environment
-mainapp/env/
-mainapp/mainapp/env/
-
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
 
 # Django
 *.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
+*.pot
+*.pyc
+__pycache__/
 
-# IDE
+# SQLite DBs (anywhere)
+**/db.sqlite3
+**/db.sqlite3-journal
+*.sqlite3
+
+# Media uploads (runtime)
+media/
+
+# Environments
+.env
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Static files
+# Keep static/ tracked if it's your source assets; only ignore the collectstatic output:
+staticfiles/
+# static/   <-- uncomment ONLY if you truly generate this dir
+
+# VSCode / PyCharm
 .vscode/
 .idea/
-*.swp
-*.swo
 
 # OS
 .DS_Store
 Thumbs.db
+.venv/

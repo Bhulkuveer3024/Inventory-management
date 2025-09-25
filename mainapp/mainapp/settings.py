@@ -43,11 +43,15 @@ INSTALLED_APPS = [
     'orders',
     'widget_tweaks',
     'customers',
+    "django_otp",
+    "django_otp.plugins.otp_totp",
+    "two_factor",
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    "django_otp.middleware.OTPMiddleware", 
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -131,8 +135,32 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Authentication settings
+# settings.py
 AUTH_USER_MODEL = 'authentication.CustomUser'
-LOGIN_URL = '/login/' 
-LOGIN_REDIRECT_URL = '/dashboard/'
-LOGOUT_REDIRECT_URL = '/login/'
+
+
+# Auth views
+LOGIN_URL = '/accounts/login/'
+LOGIN_REDIRECT_URL = '/'          # or '/orders/'
+LOGOUT_REDIRECT_URL = '/accounts/login/'
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',  # default
+]
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+DEBUG = False
+ALLOWED_HOSTS = ["your.domain"]
+
+SECURE_SSL_REDIRECT = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
+SECURE_HSTS_SECONDS = 31536000
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = "DENY"
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
+
+CSRF_TRUSTED_ORIGINS = ["https://your.domain"]
