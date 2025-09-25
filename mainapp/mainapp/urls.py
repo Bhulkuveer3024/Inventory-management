@@ -21,8 +21,23 @@ handler403 = "mainapp.views.permission_denied"
 
 
 urlpatterns = [
+    path("", include("two_factor.urls", "two_factor")),
     path('admin/', admin.site.urls),
-    path('', include('authentication.urls')),
-    path('inventory/', include('inventory.urls')),
-    path('orders/', include('orders.urls')),    
+    path("accounts/", include("authentication.urls", namespace="authentication")),
+    path("accounts/", include("django.contrib.auth.urls")),
+    path("inventory/", include("inventory.urls", namespace="inventory")),
+    path("orders/", include("orders.urls", namespace="orders")),
+    path("", include("orders.urls", namespace="orders")),
+]
+
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+
+    # your custom auth app routes (signup/login pages you already have)
+
+    # Django’s built-in auth helpers: password reset/change, etc.
+
+    # apps
+      # optional: home -> orders list
 ]
