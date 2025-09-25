@@ -19,11 +19,10 @@ from django.urls import path, include
 from django.views.generic import RedirectView
 handler403 = "mainapp.views.permission_denied"
 
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('authentication.urls')),
     path('inventory/', include('inventory.urls')),
     path('orders/', include('orders.urls')),    
-    path("", RedirectView.as_view(url="/orders/", permanent=False)),
-    
 ]
