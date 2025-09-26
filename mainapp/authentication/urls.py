@@ -1,14 +1,9 @@
 from django.urls import path
-from .views import login_view, signup_view, logout_view, dashboard
+
+from .views import RoleBasedLoginView
 
 app_name = 'authentication'
 urlpatterns = [
-	path('login/', login_view, name='login'),
-	path('signup/', signup_view, name='signup'),
-	path('logout/', logout_view, name='logout'),
-	path('dashboard/', dashboard, name='dashboard'),
+    path('login/', RoleBasedLoginView.as_view(), name='login'),
+    path('signup/', __import__('authentication.views', fromlist=['signup']).signup, name='signup'),
 ]
-from django.urls import path, include
-
-app_name = 'authentication'
-urlpatterns = []
