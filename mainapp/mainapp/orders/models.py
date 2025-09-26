@@ -8,7 +8,7 @@ class Order(models.Model):
         ("DRAFT", "Draft"),
         ("PENDING", "Pending Payment"),
         ("PAID", "Paid"),
-        # ("FULFILLED", "Fulfilled"),
+        ("FULFILLED", "Fulfilled"),
         ("CANCELLED", "Cancelled"),
     ]
     class Meta:
