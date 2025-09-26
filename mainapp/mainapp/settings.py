@@ -23,13 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "dev-insecure-key-CHANGE-ME")  # local only
 DEBUG = True
 
-<<<<<<< HEAD
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
-
-# Application definition
-=======
 ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
->>>>>>> 440b0ee70f4c9c681cd9f43649f32987bc5ff347
 
 # --------------------------------------------------------------------------------------
 # Applications
@@ -53,11 +47,7 @@ INSTALLED_APPS = [
     # Utils
     'widget_tweaks',
 
-    # 2FA / OTP
-    # "django_otp",
-    # "django_otp.plugins.otp_static",
-    # "django_otp.plugins.otp_totp",
-    # "two_factor",
+
 ]
 
 # --------------------------------------------------------------------------------------
@@ -69,7 +59,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',  # before OTP
-    # "django_otp.middleware.OTPMiddleware",
+
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
