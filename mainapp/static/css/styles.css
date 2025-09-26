@@ -1,0 +1,58 @@
+/* Customer app beautification styles */
+.customer-products, .customer-orders, .place-order-form {
+  max-width: 800px;
+  margin: 2em auto;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+  padding: 2em;
+}
+.section-title {
+  font-size: 2em;
+  font-weight: 700;
+  margin-bottom: 1em;
+  color: #2a2a2a;
+}
+.product-grid, .order-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5em;
+}
+.product-card, .order-card {
+  background: #f7f7fa;
+  border-radius: 8px;
+  padding: 1.2em;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+  transition: box-shadow 0.2s;
+}
+.product-card:hover, .order-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+}
+.product-info h3, .order-info h3 {
+  margin: 0 0 0.5em 0;
+  font-size: 1.2em;
+  color: #3a3a3a;
+}
+.stock, .order-status {
+  font-weight: bold;
+  color: #007bff;
+}
+.btn {
+  display: inline-block;
+  background: #007bff;
+  color: #fff;
+  padding: 0.7em 1.4em;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  transition: background 0.2s;
+  border: none;
+  cursor: pointer;
+}
+.btn:hover {
+  background: #0056b3;
+}
+.order-form .form-fields {
+  margin-bottom: 1.5em;
+}

@@ -11,6 +11,12 @@ class Order(models.Model):
         ("FULFILLED", "Fulfilled"),
         ("CANCELLED", "Cancelled"),
     ]
+    class Meta:
+        permissions = (
+            ("can_fulfill_order", "Can mark orders as Fulfilled"),
+            ("can_cancel_order", "Can cancel any order"),
+            ("can_view_reports", "Can view sales reports"),
+        )
     customer_name = models.CharField(max_length=150)
     customer_email = models.EmailField(blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="DRAFT")

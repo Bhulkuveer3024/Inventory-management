@@ -1,10 +1,19 @@
-<h2>Place an Order</h2>
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  {{ formset.management_form }}
-  {% for form in formset %}
-    {{ form.as_p }}
-  {% endfor %}
-  <button type="submit">Submit Order</button>
-</form>
+
+{% extends "base.html" %}
+{% block title %}Place an Order{% endblock %}
+{% block content %}
+<div class="place-order-form">
+  <h2 class="section-title">Place an Order</h2>
+  <form method="post" class="order-form">
+    {% csrf_token %}
+    <div class="form-fields">
+      {{ form.as_p }}
+      {{ formset.management_form }}
+      {% for form in formset %}
+        {{ form.as_p }}
+      {% endfor %}
+    </div>
+    <button class="btn" type="submit">Submit Order</button>
+  </form>
+</div>
+{% endblock %}

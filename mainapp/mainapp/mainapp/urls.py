@@ -16,10 +16,39 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.views.generic import RedirectView
+handler403 = "mainapp.views.permission_denied"
+
+
+
+
+from django.views.generic import RedirectView
+from authentication.views import login_view
 
 urlpatterns = [
+    path("", include("two_factor.urls", "two_factor")),
     path('admin/', admin.site.urls),
-    path('', include('authentication.urls')),
+    path('', login_view, name='login'),
+    path('login/', RedirectView.as_view(url='/auth/login/', permanent=False)),
+    path('auth/', include('authentication.urls')),
     path('inventory/', include('inventory.urls')),
-    path('orders/', include('orders.urls')),    
+    path('orders/', include('orders.urls')),
+    path('customers/', include('customers.urls')),
+    path("accounts/", include("authentication.urls", namespace="authentication")),
+    path("accounts/", include("django.contrib.auth.urls")),
+    path("inventory/", include("inventory.urls", namespace="inventory")),
+    path("orders/", include("orders.urls", namespace="orders")),
+    path("", include("orders.urls", namespace="orders")),
+]
+
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+
+    # your custom auth app routes (signup/login pages you already have)
+
+    # Django’s built-in auth helpers: password reset/change, etc.
+
+    # apps
+      # optional: home -> orders list
 ]
