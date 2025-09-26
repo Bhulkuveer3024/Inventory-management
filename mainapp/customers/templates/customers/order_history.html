@@ -1,0 +1,9 @@
+<h2>Your Orders</h2>
+<ul>
+  {% for order in orders %}
+    <li>Order #{{ order.pk }} - Status: {{ order.status }}</li>
+  {% empty %}
+    <li>No orders found.</li>
+  {% endfor %}
+</ul>
+<a href="{% url 'customers:product_list' %}">Back to Products</a>

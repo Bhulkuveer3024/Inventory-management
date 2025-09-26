@@ -1,0 +1,93 @@
+{% extends "inventory/base.html" %}
+{% block title %}Order #{{ order.id }}{% endblock %}
+{% block content %}
+
+<style>
+  .page-head { display:flex; align-items:end; justify-content:space-between; gap:12px; margin-bottom:1rem; }
+  .card { border: 1px solid rgba(0,0,0,.125); border-radius: .5rem; }
+  .card-header { padding: .75rem 1rem; border-bottom: 1px solid rgba(0,0,0,.125); background: #f8f9fa; font-weight: 600; }
+  .card-body { padding: 1rem; }
+  .badge-rounded { border-radius: 999px; padding: .35rem .6rem; font-weight: 600; }
+</style>
+
+<div class="page-head">
+  <h1 class="m-0">Order #{{ order.id }}</h1>
+  <div class="d-flex gap-2">
+    <a href="{% url 'orders:update' order.pk %}" class="btn btn-warning">Edit</a>
+    <a href="{% url 'orders:delete' order.pk %}" class="btn btn-danger">Delete</a>
+    <a href="{% url 'orders:list' %}" class="btn btn-secondary">Back</a>
+  </div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header">Customer</div>
+      <div class="card-body">
+        <div><strong>Name:</strong> {{ order.customer_name }}</div>
+        <div><strong>Email:</strong> {{ order.customer_email|default:"—" }}</div>
+        <div class="mt-2">
+          <strong>Status:</strong>
+          {% if order.status == "DRAFT" %}
+            <span class="badge bg-secondary badge-rounded">Draft</span>
+          {% elif order.status == "PENDING" %}
+            <span class="badge bg-warning text-dark badge-rounded">Pending</span>
+          {% elif order.status == "PAID" %}
+            <span class="badge bg-success badge-rounded">Paid</span>
+          {% elif order.status == "FULFILLED" %}
+            <span class="badge bg-info text-dark badge-rounded">Fulfilled</span>
+          {% elif order.status == "CANCELLED" %}
+            <span class="badge bg-danger badge-rounded">Cancelled</span>
+          {% else %}
+            <span class="badge bg-light text-dark badge-rounded">{{ order.get_status_display }}</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header">Timestamps</div>
+      <div class="card-body">
+        <div><strong>Created:</strong> {{ order.created_at|date:"Y-m-d H:i" }}</div>
+        <div><strong>Updated:</strong> {{ order.updated_at|date:"Y-m-d H:i" }}</div>
+        <div class="mt-2"><strong>Total:</strong>
+          {% with t=order.total %}
+            {% if t %}${{ t }}{% else %}—{% endif %}
+          {% endwith %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">Items</div>
+  <div class="card-body p-0">
+    <table class="table table-striped table-bordered align-middle m-0">
+      <thead class="table-light">
+        <tr>
+          <th>Product</th>
+          <th>Unit Price</th>
+          <th>Qty</th>
+          <th>Subtotal</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for it in order.items.all %}
+        <tr>
+          <td>{{ it.product }}</td>
+          <td>${{ it.unit_price }}</td>
+          <td>{{ it.quantity }}</td>
+          <td>${{ it.subtotal }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" class="text-center">No items in this order.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}
