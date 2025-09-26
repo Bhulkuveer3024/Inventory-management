@@ -1,8 +1,4 @@
 from django.contrib import admin
-
-# Register your models here.
-# This makes Order + OrderItem editable in the Django admin.
-
 from .models import Order, OrderItem
 
 class OrderItemInline(admin.TabularInline):

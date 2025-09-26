@@ -1,6 +1,4 @@
-# This maps URLs to our simple list/detail views.
 
-# What this does: Routes for orders CRUD.
 from django.urls import path
 from . import views
 

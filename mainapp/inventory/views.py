@@ -1,17 +1,26 @@
+
 from django.shortcuts import render, get_object_or_404, redirect
 from .forms import ProductForm
-from .models import Product  
+from .models import Product
+from django.contrib.auth.decorators import login_required, user_passes_test
+
+def can_manage_inventory(user):
+    return hasattr(user, 'role') and user.role in ['store_manager', 'system_admin']
 
 
+@login_required
 def product_list(request):
     products = Product.objects.all()
     context = {'products': products}
     return render(request, 'inventory/product_list.html', context)
 
+@login_required
 def product_detail(request, pk):
-    product =get_object_or_404(Product, pk =pk)
+    product = get_object_or_404(Product, pk=pk)
     return render(request, 'inventory/product_detail.html', {'product': product})
 
+@login_required
+@user_passes_test(can_manage_inventory)
 def product_create(request):
     if request.method == 'POST':
         form = ProductForm(request.POST)
@@ -24,6 +33,8 @@ def product_create(request):
         form = ProductForm()
     return render(request, 'inventory/product_form.html', {'form': form})
 
+@login_required
+@user_passes_test(can_manage_inventory)
 def product_edit(request, pk):
     product = get_object_or_404(Product, pk=pk)
     if request.method == 'POST':
@@ -36,6 +47,8 @@ def product_edit(request, pk):
     return render(request, 'inventory/product_form.html', {'form': form})
 
 
+@login_required
+@user_passes_test(can_manage_inventory)
 def product_delete(request, pk):
     product = get_object_or_404(Product, pk=pk)
     if request.method == 'POST':
@@ -43,6 +56,8 @@ def product_delete(request, pk):
         return redirect('inventory:product_list')
     return render(request, 'inventory/product_delete.html', {'product': product})
 
+@login_required
+@user_passes_test(can_manage_inventory)
 def product_update(request, pk):
     product = get_object_or_404(Product, pk=pk)
     if request.method == 'POST':

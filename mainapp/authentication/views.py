@@ -12,6 +12,8 @@ class RoleBasedLoginView(LoginView):
                 return '/inventory/'
             elif user.role == 'sales_staff':
                 return '/orders/'
+            elif user.role == 'system_admin':
+                return '/admin/'
         return super().get_success_url()
 from .forms import CustomUserCreationForm
 
