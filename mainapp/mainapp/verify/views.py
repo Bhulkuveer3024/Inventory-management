@@ -1,6 +1,5 @@
 from django.shortcuts import render
 
-# Create your views here.
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.core.mail import send_mail
@@ -19,7 +18,7 @@ def verify(request, token):
     ev = get_object_or_404(EmailVerification, token=token)
     if ev.is_valid():
         u = ev.user
-        u.is_active = True           # only flips the built-in active flag
+        u.is_active = True     
         u.save()
         login(request, u)
         return render(request, "verify/verify_success.html")
