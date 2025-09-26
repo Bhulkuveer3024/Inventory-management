@@ -4,7 +4,6 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test, permission_required
 from django.core.exceptions import ValidationError, PermissionDenied
 
-# orders/views.py (only showing full file for clarity)
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -16,16 +15,11 @@ from .models import Order, OrderItem
 from .forms import OrderForm, OrderItemFormSet
 from inventory.models import Product
 
-# ----------------------------
-# Role-check function
-# ----------------------------
+
 def has_order_access(user):
-    # Only store_manager and sales_staff can access orders
     return user.role in ['store_manager', 'sales_staff']
 
-# ----------------------------
-# Orders Views
-# ----------------------------
+
 @login_required
 @user_passes_test(has_order_access)
 def order_list(request):
@@ -72,7 +66,6 @@ def order_create(request):
         if form.is_valid() and formset.is_valid():
             try:
                 with transaction.atomic():
-                    # Save order and formset (ensure formset is bound to saved order)
                     order = form.save()
                     formset.instance = order
                     formset.save()
@@ -84,7 +77,6 @@ def order_create(request):
                 messages.error(request, f"{e}")
         else:
             messages.error(request, "Please fix the form errors below.")
-            # DEBUG (optional): print(form.errors, formset.errors)
     else:
         form = OrderForm(instance=order)
         formset = OrderItemFormSet(instance=order, prefix="items")
@@ -109,7 +101,6 @@ def order_update(request, pk):
     order = get_object_or_404(Order, pk=pk)
     old_status = order.status
 
-    # snapshot old items by product BEFORE saving, only needed if was PAID
     old_counts = _snapshot_counts(order) if old_status == "PAID" else Counter()
 
     if request.method == "POST":
@@ -124,17 +115,16 @@ def order_update(request, pk):
                     # If status changed, use full adjustments
                     if old_status != order.status:
                         if order.status == "PAID" and old_status != "PAID":
-                            _apply_stock_delta(order, deduct=True)          # deduct everything (new)
+                            _apply_stock_delta(order, deduct=True)         
                         elif old_status == "PAID" and order.status in ("CANCELLED", "DRAFT"):
-                            _apply_stock_delta(order, deduct=False)         # return everything (old)
+                            _apply_stock_delta(order, deduct=False)        
                     else:
                         # Status unchanged
                         if order.status == "PAID":
-                            # Compute deltas between old and new items
                             new_counts = _snapshot_counts(order)
                             deltas = _compute_deltas(old_counts, new_counts)
                             if deltas:
-                                _apply_stock_delta_partial(deltas)          # +/- only the difference
+                                _apply_stock_delta_partial(deltas)         
 
                 messages.success(request, "Order updated.")
                 return redirect("orders:detail", pk=order.pk)
@@ -170,9 +160,6 @@ def order_delete(request, pk):
         return redirect("orders:list")
     return render(request, "orders/order_confirm_delete.html", {"order": order})
 
-# ----------------------------
-# Stock helper functions
-# ----------------------------
 def _snapshot_counts(order):
     """
     Return a Counter mapping product_id -> total qty in this order.
@@ -208,7 +195,6 @@ def _apply_stock_delta_partial(deltas):
     pids = [pid for pid in deltas.keys() if pid]
     products = {p.id: p for p in Product.objects.select_for_update().filter(id__in=pids)}
 
-    # Validate availability for deductions first
     for pid, delta in deltas.items():
         if delta > 0:
             p = products[pid]
