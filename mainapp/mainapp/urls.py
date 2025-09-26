@@ -23,15 +23,16 @@ handler403 = "mainapp.views.permission_denied"
 
 
 from django.views.generic import RedirectView
-from authentication.views import login_view
+from authentication.views import RoleBasedLoginView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', login_view, name='login'),
+    path('', RoleBasedLoginView.as_view(), name='login'),
     path('login/', RedirectView.as_view(url='/auth/login/', permanent=False)),
     path('auth/', include('authentication.urls')),
     path('inventory/', include('inventory.urls')),
     path('orders/', include('orders.urls')),
     path('customers/', include('customers.urls')),
+    path('verify/', include('verify.urls', namespace='verify')),
 
 ]
